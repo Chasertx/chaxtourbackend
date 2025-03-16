@@ -8,6 +8,7 @@ import { RedisClientOptions } from 'redis';
 import * as redisStore from 'cache-manager-redis-store';
 import { StocksService } from './stocks/stocks.service';
 import { HttpModule } from '@nestjs/axios';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { HttpModule } from '@nestjs/axios';
       ttl: 10, // Optional: Set default cache expiration time in seconds
     }),
     HttpModule,
+    AuthModule,
   ],
   providers: [StocksService],
   exports: [StocksService],
