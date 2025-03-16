@@ -16,16 +16,28 @@ export class AuthController {
    * 4. if PW does not match then it returns invalid credentials
    * 5. if the passwords match, it generates the token to generate a JWT token and return it
    */
+  @Post('login')
   async login(@Body() body: { email: string; password: string }) {
-    // Dummy user (Replace with DB lookup)
-    const user = { id: 1, email: body.email, password: '$2a$10$dummyhash' };
+    const user = await this.authService.findByEmail(body.email);
 
     if (
+      !user ||
       !(await this.authService.comparePasswords(body.password, user.password))
     ) {
       return { message: 'Invalid credentials' };
     }
 
+    return this.authService.generateToken(user);
+  }
+
+  @Post('register')
+  async register(@Body() body: { email: string; password: string }) {
+    const existingUser = await this.authService.findByEmail(body.email);
+    if (existingUser) {
+      return { message: 'User already exists' };
+    }
+
+    const user = await this.authService.register(body.email, body.password);
     return this.authService.generateToken(user);
   }
 }

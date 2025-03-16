@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt'; //jwt service for handling JWT creation and validation
 import * as bcrypt from 'bcryptjs'; //bcryptjs to hash passwords and compare plaintext passwords with hashes passwords
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from '../users/user.entity';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Injectable()
 export class AuthService {
@@ -9,7 +13,10 @@ export class AuthService {
    * JWT generation in the generateToken()
    * method
    */
-  constructor(private jwtService: JwtService) {}
+  constructor(
+    private jwtService: JwtService,
+    @InjectRepository(User) private userRepository: Repository<User>, // Inject the user repository
+  ) {}
   /**
    * hashes the provided password using bcrypt
    * the password is hashed with a salt factor
@@ -47,9 +54,29 @@ export class AuthService {
    */
   async generateToken(user: any) {
     const payload = { sub: user.id, email: user.email };
+    console.log('JWT_SECRET:', process.env.JWT_SECRET);
     //jwt.service.sign() method is used to generate the token
     //from the payload, which is signed with a secret key
     //configured in the nest application
-    return { access_token: this.jwtService.sign(payload) };
+    try {
+      return { access_token: this.jwtService.sign(payload) };
+    } catch (error) {
+      console.error('Error generating JWT: ', error);
+      throw error;
+    }
+  }
+
+  // Register a new user
+  async register(email: string, password: string): Promise<User> {
+    const hashedPassword = await this.hashPassword(password);
+    const user = new User();
+    user.email = email;
+    user.password = hashedPassword;
+
+    return await this.userRepository.save(user);
+  }
+  // Find user by email
+  async findByEmail(email: string): Promise<User | null> {
+    return this.userRepository.findOne({ where: { email } });
   }
 }

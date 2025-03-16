@@ -4,6 +4,10 @@ import { AuthController } from './auth.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './jwt.strategy';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from 'src/users/user.entity';
+import * as dotenv from 'dotenv';
+dotenv.config(); // Load environment variables from .env file
 
 @Module({
   //defines a nestJS module. Accepts an object that specifies which components are imported, controllers and providers associated with the module.
@@ -13,6 +17,7 @@ import { JwtStrategy } from './jwt.strategy';
       secret: process.env.JWT_SECRET, //secret used to sign the JWT tokens
       signOptions: { expiresIn: process.env.JWT_EXPIRATION }, //token expiration time
     }),
+    TypeOrmModule.forFeature([User]),
   ],
   controllers: [AuthController], //Receives http requests and interacts with the auth service
   providers: [AuthService, JwtStrategy], //AuthService: Contains core authentication logic such as hashing passwords and generating JWT tokens. JWTStrategy: the custom passport strategy for verifying JWT tokens. It defines how the server validates incoming JWTs.

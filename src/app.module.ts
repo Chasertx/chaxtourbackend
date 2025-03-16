@@ -9,6 +9,7 @@ import * as redisStore from 'cache-manager-redis-store';
 import { StocksService } from './stocks/stocks.service';
 import { HttpModule } from '@nestjs/axios';
 import { AuthModule } from './auth/auth.module';
+import { User } from './users/user.entity'; // Import the User entity
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { AuthModule } from './auth/auth.module';
     }),
     HttpModule,
     AuthModule,
+    TypeOrmModule.forFeature([User]),
   ],
   providers: [StocksService],
   exports: [StocksService],
